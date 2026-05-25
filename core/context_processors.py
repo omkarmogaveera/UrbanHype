@@ -3,7 +3,10 @@ from .models import Slide, Category
 
 
 def slides_processor(request):
-    items = Slide.objects.filter(is_active=True).order_by('pk')
+    try:
+        items = Slide.objects.filter(is_active=True).order_by('pk')
+    except Exception:
+        return {"slides_html": mark_safe('')}
     out = []
     for s in items:
         img = s.image.url if hasattr(s.image, 'url') else s.image
