@@ -82,6 +82,10 @@ DATABASES = {
         conn_max_age=600
     )
 }
+# Django 2.2 asserts the DB session timezone is UTC; force it at connect time
+if DATABASES["default"].get("ENGINE") == "django.db.backends.postgresql":
+    DATABASES["default"].setdefault("OPTIONS", {})[
+        "options"] = "-c timezone=UTC"
 
 # Security defaults (override via env vars for production)
 SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'True') == 'True'
