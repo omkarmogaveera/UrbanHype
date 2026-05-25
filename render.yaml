@@ -3,7 +3,7 @@ services:
     name: urbanhype
     env: python
     buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py seed_github"
-    startCommand: "gunicorn demo.wsgi:application"
+    startCommand: "gunicorn app.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
