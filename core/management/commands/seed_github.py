@@ -3,7 +3,7 @@ import urllib.request
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.utils.text import slugify
-from core.models import Category, Item, OrderItem, Order
+from core.models import Category, Item, OrderItem, Order, Slide
 
 GITHUB_RAW = "https://raw.githubusercontent.com/seebham/ecommerce-dummy-data/main/images/"
 DATA_URL = "https://raw.githubusercontent.com/seebham/ecommerce-dummy-data/main/data.json"
@@ -53,9 +53,10 @@ class Command(BaseCommand):
         OrderItem.objects.all().delete()
         Order.objects.all().delete()
 
-        self.stdout.write("Deleting old products and categories...")
+        self.stdout.write("Deleting old products, categories and slides...")
         Item.objects.all().delete()
         Category.objects.all().delete()
+        Slide.objects.all().delete()
 
         # ------------------------------------------------------------------
         # 2. Ensure media/images folder exists
@@ -155,6 +156,38 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(
             f"\nDone. {created} products created across {len(cat_map)} categories."))
+
+        # ------------------------------------------------------------------
+        # 5. Create hero slides using banner images from static_in_env
+        # ------------------------------------------------------------------
+        import shutil
+        banners_src = os.path.join(
+            settings.BASE_DIR, 'static_in_env', 'images')
+        banners_dst = os.path.join(settings.MEDIA_ROOT, 'banners')
+        os.makedirs(banners_dst, exist_ok=True)
+
+        SLIDES = [
+            ("New Arrivals",     "Shop The Latest Collection",
+             "/shop/",               "hero-01.jpg"),
+            ("Top Electronics",  "Mobiles & Laptops On Sale",
+             "/category/mobiles/",   "hero-02.jpg"),
+            ("Home & Furniture", "Style Your Space",
+             "/category/furniture/", "hero-03.jpg"),
+        ]
+        self.stdout.write("Creating slides...")
+        for caption1, caption2, link, fname in SLIDES:
+            src = os.path.join(banners_src, fname)
+            dst = os.path.join(banners_dst, fname)
+            if os.path.exists(src) and not os.path.exists(dst):
+                shutil.copy2(src, dst)
+            Slide.objects.create(
+                caption1=caption1,
+                caption2=caption2,
+                link=link,
+                image=f"banners/{fname}" if os.path.exists(dst) else "",
+                is_active=True,
+            )
+        self.stdout.write(self.style.SUCCESS(f"Created {len(SLIDES)} slides."))
 
     def _download(self, url, dest):
         try:

@@ -9,7 +9,7 @@ def slides_processor(request):
         return {"slides_html": mark_safe('')}
     out = []
     for s in items:
-        img = s.image.url if hasattr(s.image, 'url') else s.image
+        img = s.image.url if s.image else ''
         html = (
             f"<div class=\"item-slick1 item2-slick1\" style=\"background-image: url({img}); background-size:cover; background-position:center;\">"
             "<div class=\"wrap-content-slide1 sizefull flex-col-c-m p-l-15 p-r-15 p-t-150 p-b-170 hero\">"
