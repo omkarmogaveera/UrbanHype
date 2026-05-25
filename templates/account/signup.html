@@ -1,0 +1,139 @@
+{% extends "account/base.html" %} {% load i18n %} {% block head_title %}Create
+Account — UrbanHype{% endblock %} {% block content %}
+<style>
+  .auth-wrapper {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 15px;
+    background: #f9f9f9;
+  }
+  .auth-card {
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 440px;
+  }
+  .auth-card h1 {
+    font-size: 22px;
+    color: #222;
+    margin-bottom: 8px;
+  }
+  .auth-card p {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 28px;
+  }
+  .auth-card .form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 6px;
+  }
+  .auth-card .form-control {
+    border: 1px solid #ddd !important;
+    border-radius: 2px;
+    height: 44px;
+    font-size: 14px;
+  }
+  .auth-card .form-control:focus {
+    border-color: #111 !important;
+    box-shadow: none;
+  }
+  .errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 4px;
+    color: #e65540;
+    font-size: 12px;
+  }
+  .btn-auth {
+    width: 100%;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 2px;
+    height: 46px;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .btn-auth:hover {
+    background: #e65540;
+  }
+  .auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: #888;
+  }
+  .auth-footer a {
+    color: #111;
+    font-weight: 600;
+  }
+</style>
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <h1>{% trans "Create Account" %}</h1>
+    <p>
+      {% blocktrans %}Already have an account?
+      <a href="{{ login_url }}">Sign in</a>.{% endblocktrans %}
+    </p>
+
+    <form
+      class="signup"
+      id="signup_form"
+      method="POST"
+      action="{% url 'account_signup' %}"
+    >
+      {% csrf_token %} {% if redirect_field_value %}
+      <input
+        type="hidden"
+        name="{{ redirect_field_name }}"
+        value="{{ redirect_field_value }}"
+      />
+      {% endif %} {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        <input
+          type="{{ field.field.widget.input_type }}"
+          name="{{ field.html_name }}"
+          id="{{ field.id_for_label }}"
+          class="form-control{% if field.errors %} is-invalid{% endif %}"
+          placeholder="{{ field.label }}"
+          {%
+          if
+          field.field.required
+          %}required{%
+          endif
+          %}
+          autocomplete="{{ field.html_name }}"
+        />
+        {% if field.errors %}
+        <ul class="errorlist">
+          {% for e in field.errors %}
+          <li>{{ e }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% endfor %}
+
+      <button class="btn-auth" type="submit">
+        {% trans "Create Account" %}
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      Already a member? <a href="{% url 'account_login' %}">Sign in</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

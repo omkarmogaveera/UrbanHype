@@ -1,0 +1,107 @@
+/* UrbanHype theme inspired by DESIGN.md tokens */
+:root {
+  --color-canvas-white: #fbf8f6;
+  --color-surface-white: #ffffff;
+  --color-ink-black: #000000;
+  --color-graphite: #333333;
+  --color-fog-gray: #dadada;
+  --color-storm-gray: #6c6a6a;
+  --color-market-yellow: #f1f29f;
+  --text-body: 18px;
+  --radius-cards: 4px;
+  --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  --font-heading: "Merriweather", serif;
+  --space-xxs: 6px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 24px;
+  --space-lg: 48px;
+}
+body {
+  background: var(--color-canvas-white);
+  color: var(--color-graphite);
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+}
+/* Hero */
+.hero {
+  /* background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.9)
+  ); */
+  padding: var(--space-lg) 0;
+}
+/* Product card */
+.product-card {
+  background: var(--color-surface-white);
+  border-radius: var(--radius-cards);
+  padding: var(--space-sm);
+  border: 1px solid var(--color-fog-gray);
+}
+.product-card img {
+  border-radius: 4px;
+  max-width: 100%;
+  height: auto;
+}
+/* Buttons */
+.btn-primary-uh {
+  background: var(--color-ink-black);
+  color: var(--color-surface-white);
+  border-radius: 4px;
+  padding: 0 24px;
+  border: none;
+}
+.btn-pill {
+  background: transparent;
+  border: 1px solid var(--color-ink-black);
+  border-radius: 999px;
+  color: var(--color-ink-black);
+  padding: 4px 10px;
+}
+/* Search */
+.search-input {
+  border-radius: 999px;
+  border: 1px solid var(--color-ink-black);
+  padding-left: 48px;
+}
+
+@media (max-width: 768px) {
+  .search-input {
+    width: 180px;
+  }
+  .uh-container {
+    padding: 0 12px;
+  }
+}
+
+.category {
+  font-size: 0.9rem;
+  color: var(--color-storm-gray);
+  margin-bottom: 6px;
+}
+.price {
+  font-weight: 700;
+  color: var(--color-ink-black);
+}
+
+/* Utilities */
+.uh-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Minor typography */
+h1,
+h2,
+h3 {
+  font-family: "Merriweather", serif;
+  color: var(--color-ink-black);
+}
+
+/* Footer */
+.site-footer {
+  padding: 32px 0;
+  color: var(--color-storm-gray);
+}
