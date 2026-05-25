@@ -14,7 +14,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='billingaddress',
             name='address_type',
-            field=models.CharField(choices=[('B', 'Billing'), ('S', 'Shipping')], default='exit', max_length=1),
+            field=models.CharField(
+                choices=[('B', 'Billing'), ('S', 'Shipping')], default='B', max_length=1),
             preserve_default=False,
         ),
         migrations.AddField(
@@ -25,11 +26,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='order',
             name='shipping_address',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='shipping_address', to='core.BillingAddress'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                    related_name='shipping_address', to='core.BillingAddress'),
         ),
         migrations.AlterField(
             model_name='order',
             name='billing_address',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='billing_address', to='core.BillingAddress'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                    related_name='billing_address', to='core.BillingAddress'),
         ),
     ]
