@@ -205,12 +205,10 @@ def remove_from_cart(request, slug):
             messages.info(request, "Item was removed from your cart.")
             return redirect("core:order-summary")
         else:
-            # add a message saying the user dosent have an order
             messages.info(request, "Item was not in your cart.")
             return redirect("core:product", slug=slug)
     else:
-        # add a message saying the user dosent have an order
-        messages.info(request, "u don't have an active order.")
+        messages.info(request, "You don't have an active order.")
         return redirect("core:product", slug=slug)
     return redirect("core:product", slug=slug)
 
@@ -238,38 +236,9 @@ def remove_single_item_from_cart(request, slug):
             messages.info(request, "This item qty was updated.")
             return redirect("core:order-summary")
         else:
-            # add a message saying the user dosent have an order
             messages.info(request, "Item was not in your cart.")
             return redirect("core:product", slug=slug)
     else:
-        # add a message saying the user dosent have an order
-        messages.info(request, "u don't have an active order.")
+        messages.info(request, "You don't have an active order.")
         return redirect("core:product", slug=slug)
     return redirect("core:product", slug=slug)
-
-
-def get_coupon(request, code):
-    try:
-        coupon = Coupon.objects.get(code=code)
-        return coupon
-    except ObjectDoesNotExist:
-        messages.info(request, "This coupon does not exist")
-        return redirect("core:checkout")
-
-
-class AddCouponView(View):
-    def post(self, *args, **kwargs):
-        form = CouponForm(self.request.POST or None)
-        if form.is_valid():
-            try:
-                code = form.cleaned_data.get('code')
-                order = Order.objects.get(
-                    user=self.request.user, ordered=False)
-                order.coupon = get_coupon(self.request, code)
-                order.save()
-                messages.success(self.request, "Successfully added coupon")
-                return redirect("core:checkout")
-
-            except ObjectDoesNotExist:
-                messages.info(request, "You do not have an active order")
-                return redirect("core:checkout")

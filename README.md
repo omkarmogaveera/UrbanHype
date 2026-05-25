@@ -64,8 +64,8 @@ pip install -r requirements-advanced.txt
 **Run migrations and start the server:**
 
 ```bash
-python manage.py migrate --settings=demo.local_test_settings
-python manage.py runserver --settings=demo.local_test_settings
+python manage.py migrate --settings=app.local_test_settings
+python manage.py runserver --settings=app.local_test_settings
 ```
 
 Visit `http://127.0.0.1:8000`
@@ -75,7 +75,7 @@ Visit `http://127.0.0.1:8000`
 ## Admin Access
 
 ```bash
-python manage.py createsuperuser --settings=demo.local_test_settings
+python manage.py createsuperuser --settings=app.local_test_settings
 ```
 
 Then go to `http://127.0.0.1:8000/admin/`

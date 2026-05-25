@@ -7,6 +7,9 @@ media_root/
 *.sqlite3
 *.env
 
+# Dev-only management commands
+core/management/commands/seed_advanced.py
+
 # Accept these files in the repository
 !.gitignore
 !.travis.yml
