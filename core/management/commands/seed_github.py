@@ -34,6 +34,11 @@ class Command(BaseCommand):
         import json
         import urllib.request as req
 
+        if Item.objects.exists():
+            self.stdout.write(self.style.SUCCESS(
+                'Database already seeded — skipping.'))
+            return
+
         self.stdout.write("Fetching product data from GitHub...")
         with req.urlopen(DATA_URL, timeout=30) as r:
             data = json.loads(r.read().decode())
