@@ -2,7 +2,7 @@
 
 A full-featured e-commerce web application built with Django. Browse products across multiple categories, filter and sort by price, add items to your cart, and manage your order — all without a payment system, keeping the focus on the shopping experience.
 
-**Built with:** Django 2.2 · Python 3.10 · SQLite · Bootstrap 4 · django-allauth
+**Built with:** Django 2.2 · Python 3.10 · PostgreSQL (Neon) · Bootstrap 4 · django-allauth
 
 ---
 
@@ -90,6 +90,7 @@ Copy `.env.example` to `.env` and fill in your values, or set them as environmen
 DJANGO_SECRET_KEY=your-generated-secret-key
 DJANGO_DEBUG=False
 ALLOWED_HOSTS=yourdomain.com
+DATABASE_URL=postgresql://user:password@host/dbname?sslmode=require
 ```
 
 Generate a secret key:
