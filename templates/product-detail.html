@@ -118,11 +118,11 @@
               <!-- Button -->
             </div>
 
-            <a
-              href="{{ object.get_add_to_cart_url }}"
+            <button
+              data-cart-add="{{ object.get_add_to_cart_url }}"
               class="btn btn-primary"
               style="margin: 2px"
-              >Add to Cart</a
+              >Add to Cart</button
             >
             <a
               href="{{object.get_remove_from_cart_url}}"

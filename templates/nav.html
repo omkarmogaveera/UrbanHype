@@ -30,7 +30,7 @@
 
       <div class="topbar-child2">
         <span class="topbar-email">
-          <a href="mailto:omkar@example.com"> omkar@example.com </a>
+          <a href="mailto:omkarmogavera@gmail.com"> omkarmogavera@gmail.com </a>
         </span>
 
         <div class="topbar-language rs1-select2">
@@ -88,7 +88,7 @@
                       class="header-icon1 js-show-header-dropdown"
                       alt="ICON"
                     />
-                    <span class="header-icons-noti"
+                    <span class="header-icons-noti js-cart-count"
                       >{{ request.user|cart_item_count }}</span
                     >
                   </a>
@@ -150,7 +150,7 @@
               class="header-icon1 js-show-header-dropdown"
               alt="ICON"
             />
-            <span class="header-icons-noti"
+            <span class="header-icons-noti js-cart-count"
               >{{ request.user|cart_item_count }}</span
             >
             {% load cart_dropdown %} {% cart_dropdown %}
@@ -210,7 +210,7 @@
         {% categories_mobile %} {% if request.user.is_authenticated %}
         <li class="item-menu-mobile">
           <a href="{% url 'core:order-summary' %}"
-            >Cart<span class="badge badge-dark"
+            >Cart<span class="badge badge-dark js-cart-count"
               >{{ request.user|cart_item_count }}</span
             ></a
           >

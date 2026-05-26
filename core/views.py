@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import ListView, DetailView, View
@@ -16,14 +17,14 @@ class HomeView(ListView):
     context_object_name = 'items'
 
     def get_queryset(self):
-        return Item.objects.filter(is_active=True).select_related('category').order_by('?')[:8]
+        return Item.objects.filter(is_active=True).select_related('category').order_by('-id')[:8]
 
 
 class OrderSummaryView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         try:
-            order = Order.objects.get(user=self.request.user, ordered=False)
-            order.items.select_related('item')
+            order = Order.objects.prefetch_related('items__item').get(
+                user=self.request.user, ordered=False)
             context = {
                 'object': order
             }
@@ -159,6 +160,7 @@ class CategoryView(View):
 @login_required
 def add_to_cart(request, slug):
     item = get_object_or_404(Item, slug=slug)
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     order_item, created = OrderItem.objects.get_or_create(
         item=item,
         user=request.user,
@@ -167,20 +169,31 @@ def add_to_cart(request, slug):
     order_qs = Order.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
         order = order_qs[0]
-        if order.items.filter(item__slug=item.slug).exists():
+        if created:
+            msg = f"'{item.title}' added to your cart."
+        else:
             order_item.quantity += 1
             order_item.save()
-            messages.success(
-                request, f"'{item.title}' qty updated in your cart.")
-        else:
-            order.items.add(order_item)
-            messages.success(request, f"'{item.title}' added to your cart.")
+            msg = f"'{item.title}' qty updated."
+        order.items.add(order_item)  # idempotent — safe even if already linked
     else:
-        ordered_date = timezone.now()
         order = Order.objects.create(
-            user=request.user, ordered_date=ordered_date)
+            user=request.user, ordered_date=timezone.now())
         order.items.add(order_item)
-        messages.success(request, f"'{item.title}' added to your cart.")
+        msg = f"'{item.title}' added to your cart."
+    if is_ajax:
+        order_item.refresh_from_db()
+        return JsonResponse({
+            'status': 'ok',
+            'message': msg,
+            'cart_count': order.items.count(),
+            'new_quantity': order_item.quantity,
+            'item_total': str(order_item.get_total_item_price()),
+            'order_total': str(order.get_total()),
+            'removed': False,
+            'empty': False,
+        })
+    messages.success(request, msg)
     next_url = request.META.get('HTTP_REFERER') or reverse(
         'core:product', kwargs={'slug': slug})
     return redirect(next_url)
@@ -189,56 +202,67 @@ def add_to_cart(request, slug):
 @login_required
 def remove_from_cart(request, slug):
     item = get_object_or_404(Item, slug=slug)
-    order_qs = Order.objects.filter(
-        user=request.user,
-        ordered=False)
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    order_qs = Order.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
         order = order_qs[0]
-        # check if the order item is in the order
-        if order.items.filter(item__slug=item.slug).exists():
-            order_item = OrderItem.objects.filter(
-                item=item,
-                user=request.user,
-                ordered=False
-            )[0]
+        order_item = OrderItem.objects.filter(
+            item=item, user=request.user, ordered=False).first()
+        if order_item and order.items.filter(pk=order_item.pk).exists():
             order.items.remove(order_item)
+            if is_ajax:
+                order_total = order.get_total()
+                return JsonResponse({
+                    'status': 'ok',
+                    'cart_count': order.items.count(),
+                    'order_total': str(order_total) if order_total else '0.00',
+                    'empty': order.items.count() == 0,
+                })
             messages.info(request, "Item was removed from your cart.")
             return redirect("core:order-summary")
-        else:
-            messages.info(request, "Item was not in your cart.")
-            return redirect("core:product", slug=slug)
-    else:
-        messages.info(request, "You don't have an active order.")
-        return redirect("core:product", slug=slug)
-    return redirect("core:product", slug=slug)
+    if is_ajax:
+        return JsonResponse({'status': 'error', 'message': 'Item not in cart'})
+    messages.info(request, "Item was not in your cart.")
+    return redirect("core:order-summary")
 
 
 @login_required
 def remove_single_item_from_cart(request, slug):
     item = get_object_or_404(Item, slug=slug)
-    order_qs = Order.objects.filter(
-        user=request.user,
-        ordered=False)
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    order_qs = Order.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
         order = order_qs[0]
-        # check if the order item is in the order
-        if order.items.filter(item__slug=item.slug).exists():
-            order_item = OrderItem.objects.filter(
-                item=item,
-                user=request.user,
-                ordered=False
-            )[0]
+        order_item = OrderItem.objects.filter(
+            item=item, user=request.user, ordered=False).first()
+        if order_item and order.items.filter(pk=order_item.pk).exists():
             if order_item.quantity > 1:
                 order_item.quantity -= 1
                 order_item.save()
+                if is_ajax:
+                    return JsonResponse({
+                        'status': 'ok',
+                        'removed': False,
+                        'new_quantity': order_item.quantity,
+                        'item_total': str(order_item.get_total_item_price()),
+                        'cart_count': order.items.count(),
+                        'order_total': str(order.get_total()),
+                        'empty': False,
+                    })
             else:
                 order.items.remove(order_item)
+                if is_ajax:
+                    order_total = order.get_total()
+                    return JsonResponse({
+                        'status': 'ok',
+                        'removed': True,
+                        'cart_count': order.items.count(),
+                        'order_total': str(order_total) if order_total else '0.00',
+                        'empty': order.items.count() == 0,
+                    })
             messages.info(request, "This item qty was updated.")
             return redirect("core:order-summary")
-        else:
-            messages.info(request, "Item was not in your cart.")
-            return redirect("core:product", slug=slug)
-    else:
-        messages.info(request, "You don't have an active order.")
-        return redirect("core:product", slug=slug)
-    return redirect("core:product", slug=slug)
+    if is_ajax:
+        return JsonResponse({'status': 'error', 'message': 'Item not in cart'})
+    messages.info(request, "Item was not in your cart.")
+    return redirect("core:order-summary")

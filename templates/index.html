@@ -146,8 +146,8 @@
                 {% endif %}
               </div>
               <div style="margin-top: 12px; display: flex; gap: 8px">
-                <a class="btn-primary-uh" href="#" onclick="return false;"
-                  >Add to cart</a
+                <button class="btn-primary-uh" data-cart-add="{{ item.get_add_to_cart_url }}"
+                  >Add to cart</button
                 >
                 <a class="btn-pill" href="{{ item.get_absolute_url }}">View</a>
               </div>
